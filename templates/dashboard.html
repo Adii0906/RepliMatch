@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="dashboard-container">
+
+        <!-- Glowing profile card -->
+        <div class="user-profile-card animated-glow">
+            <div class="avatar">{{ user.username[0]|capitalize }}</div>
+            <h2>{{ user.username }}</h2>
+            <p>{{ user.bio or "No bio provided." }}</p>
+            <div class="skills">
+                <strong>Skills:</strong>
+                <div class="tags">
+                    {% for skill in user.skills or [] %}
+                    <span class="tag">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Project/Repo input section -->
+        <div class="project-repo-section">
+            <form id="analyze-repo-form">
+                <label for="repo-url"><strong>Enter your project or Replit repo URL:</strong></label>
+                <input type="text" id="repo-url" name="repo_url" placeholder="https://replit.com/@user/project" required>
+                <button type="submit" class="btn btn-primary">Analyze & Find Matches</button>
+            </form>
+        </div>
+
+        <!-- Matches loaded here -->
+        <div id="match-results"></div>
+
+        <!-- Dashboard options -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">🔍</div>
+                <h3>Find Matches</h3>
+                <p>Discover developers who match your skills and interests</p>
+                <button class="btn btn-primary" onclick="findMatches()">Start Matching</button>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">💬</div>
+                <h3>Your Matches</h3>
+                <p>View and connect with your matched developers</p>
+                <a href="{{ url_for('matches') }}" class="btn btn-secondary">View Matches</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">⚙️</div>
+                <h3>Profile Settings</h3>
+                <p>Update your skills, interests, and preferences</p>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">Edit Profile</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Button glow animation
+document.getElementById('analyze-repo-form').addEventListener('submit', function() {
+    anime({
+        targets: '.btn-primary',
+        scale: [1, 1.08, 1],
+        boxShadow: [
+            '0 0 20px #3f88ff',
+            '0 0 50px #2ce0ff',
+            '0 0 20px #3f88ff'
+        ],
+        easing: 'easeInOutSine',
+        duration: 800
+    });
+});
+
+// AJAX repo analysis and match display
+document.getElementById('analyze-repo-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const repoUrl = document.getElementById('repo-url').value;
+    const response = await fetch('/api/analyze-repo', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({repo_url: repoUrl})
+    });
+    const data = await response.json();
+    const resultsDiv = document.getElementById('match-results');
+    if(data.success) {
+        resultsDiv.innerHTML = "<h3>Top Matches:</h3>" + data.matches.map(match => `
+            <div class="user-profile-card animated-glow" style="margin-bottom:1rem;">
+                <h4>${match.username}</h4>
+                <div class="skills">
+                    <strong>Skills:</strong>
+                    <div class="tags">
+                        ${(match.skills || []).map(skill => `<span class="tag">${skill}</span>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="startCollaboration(${match.user_id})">Chat & Collaborate</button>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        resultsDiv.textContent = 'No matches found or error analyzing project.';
+    }
+});
+
+// Dummy function (replace with chat/collab logic)
+function startCollaboration(matchId) {
+    window.location.href = `/chat/${matchId}`;
+}
+</script>
+{% endblock %}

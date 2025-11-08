@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="matches-section">
+    <div class="matches-container">
+        <h2 class="matches-title">Your Matches</h2>
+        <p class="matches-subtitle">Connect with developers who share your passion</p>
+        
+        <div class="matches-grid">
+            {% for match in matches %}
+            <div class="match-card">
+                <div class="match-header">
+                    <div class="match-avatar">{{ match.username[0].upper() }}</div>
+                    <div class="match-info">
+                        <h3>{{ match.username }}</h3>
+                        <div class="match-score">
+                            {{ (match.match_score * 100)|round }}% Match
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-body">
+                    <p class="match-bio">{{ match.bio or "No bio available" }}</p>
+                    
+                    <div class="match-skills">
+                        <strong>Skills:</strong>
+                        <div class="tags">
+                            {% for skill in match.skills or [] %}
+                            <span class="tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="match-interests">
+                        <strong>Interests:</strong>
+                        <div class="tags">
+                            {% for interest in match.interests or [] %}
+                            <span class="tag">{{ interest }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-footer">
+                    <button class="btn btn-primary" onclick="startCollaboration({{ match.matched_user_id }})">
+                        Start Collaborating
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function startCollaboration(matchId) {
+    const response = await fetch(`/start-collaboration/${matchId}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+        // Open the shared Repl in a new tab
+        window.open(data.repl_url, '_blank');
+        
+        // Redirect to chat interface
+        window.location.href = `/chat/${data.collaboration_id}`;
+    }
+}
+</script>
+{% endblock %}

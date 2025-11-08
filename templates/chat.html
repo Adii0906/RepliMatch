@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="chat-section">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Collaboration Space</h2>
+            <a href="{{ collaboration.repl_url }}" target="_blank" class="btn btn-primary">Open Shared Repl</a>
+        </div>
+        
+        <div class="chat-body">
+            <div id="messages" class="messages-container">
+                <!-- Messages will appear here -->
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" id="message-input" placeholder="Type a message..." />
+                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    
+    if (message) {
+        // Add message to UI
+        const messagesContainer = document.getElementById('messages');
+        const messageEl = document.createElement('div');
+        messageEl.className = 'message sent';
+        messageEl.textContent = message;
+        messagesContainer.appendChild(messageEl);
+        
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+document.getElementById('message-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+</script>
+{% endblock %}

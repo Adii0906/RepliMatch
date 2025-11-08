@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="badge">✨ AI-Powered Matchmaking</div>
+        <h1 class="hero-title">
+            Find Your Perfect<br>
+            <span class="highlight">Coding Partner</span>
+        </h1>
+        <p class="hero-subtitle">
+            Finding the right coding partner shouldn't depend on luck — it should be powered by intelligence. 
+            Connect with developers who match your skills, interests, and goals.
+        </p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary">Get Started</a>
+            <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
+        </div>
+    </div>
+    
+    <div class="hero-visual">
+        <div class="floating-card card-1">
+            <span class="tech-icon">🐍</span>
+            <span class="tech-name">Python</span>
+        </div>
+        <div class="floating-card card-2">
+            <span class="tech-icon">⚛️</span>
+            <span class="tech-name">React</span>
+        </div>
+        <div class="floating-card card-3">
+            <span class="tech-icon">🔥</span>
+            <span class="tech-name">Firebase</span>
+        </div>
+    </div>
+</section>
+
+<section id="how-it-works" class="features">
+    <h2 class="section-title">How It Works</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">👤</div>
+            <h3>Create Your Profile</h3>
+            <p>Share your skills, interests, and Replit username. Our AI analyzes your public Repls to understand your coding style.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>AI Matchmaking</h3>
+            <p>Our intelligent algorithm finds developers who complement your skills and share your interests.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>Start Collaborating</h3>
+            <p>Launch a shared Repl instantly, chat in real-time, and build amazing projects together.</p>
+        </div>
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stat-item">
+        <div class="stat-number" data-target="1000">0</div>
+        <div class="stat-label">Developers</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number" data-target="500">0</div>
+        <div class="stat-label">Successful Matches</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number" data-target="250">0</div>
+        <div class="stat-label">Active Projects</div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="profile-setup">
+    <div class="profile-container">
+        <h2 class="profile-title">Complete Your Profile</h2>
+        <p class="profile-subtitle">Help us find your perfect match</p>
+        
+        <form id="profile-form" class="profile-form">
+            <div class="form-section">
+                <h3>Technical Skills</h3>
+                <div class="skills-selector">
+                    <div class="skill-tag" data-skill="Python">Python</div>
+                    <div class="skill-tag" data-skill="JavaScript">JavaScript</div>
+                    <div class="skill-tag" data-skill="React">React</div>
+                    <div class="skill-tag" data-skill="Node.js">Node.js</div>
+                    <div class="skill-tag" data-skill="Flask">Flask</div>
+                    <div class="skill-tag" data-skill="Django">Django</div>
+                    <div class="skill-tag" data-skill="HTML/CSS">HTML/CSS</div>
+                    <div class="skill-tag" data-skill="SQL">SQL</div>
+                    <div class="skill-tag" data-skill="MongoDB">MongoDB</div>
+                    <div class="skill-tag" data-skill="Git">Git</div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Interests</h3>
+                <div class="interests-selector">
+                    <div class="interest-tag" data-interest="Web Development">Web Development</div>
+                    <div class="interest-tag" data-interest="Machine Learning">Machine Learning</div>
+                    <div class="interest-tag" data-interest="Game Development">Game Development</div>
+                    <div class="interest-tag" data-interest="Mobile Apps">Mobile Apps</div>
+                    <div class="interest-tag" data-interest="Data Science">Data Science</div>
+                    <div class="interest-tag" data-interest="Blockchain">Blockchain</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="replit-username">Replit Username</label>
+                <input type="text" id="replit-username" name="replit_username" placeholder="@yourusername">
+            </div>
+            
+            <div class="form-group">
+                <label for="bio">Bio</label>
+                <textarea id="bio" name="bio" rows="4" placeholder="Tell us about your coding journey..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full">Save Profile</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedSkills = [];
+let selectedInterests = [];
+
+// Handle skill selection
+document.querySelectorAll('.skill-tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+        this.classList.toggle('selected');
+        const skill = this.dataset.skill;
+        if (selectedSkills.includes(skill)) {
+            selectedSkills = selectedSkills.filter(s => s !== skill);
+        } else {
+            selectedSkills.push(skill);
+        }
+    });
+});
+
+// Handle interest selection
+document.querySelectorAll('.interest-tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+        this.classList.toggle('selected');
+        const interest = this.dataset.interest;
+        if (selectedInterests.includes(interest)) {
+            selectedInterests = selectedInterests.filter(i => i !== interest);
+        } else {
+            selectedInterests.push(interest);
+        }
+    });
+});
+
+// Handle form submission
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const profileData = {
+        skills: selectedSkills,
+        interests: selectedInterests,
+        tech_stack: selectedSkills, // Using same as skills for simplicity
+        project_types: selectedInterests,
+        replit_username: document.getElementById('replit-username').value,
+        bio: document.getElementById('bio').value
+    };
+    
+    const response = await fetch('/profile', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(profileData)
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+        window.location.href = data.redirect;
+    }
+});
+</script>
+{% endblock %}

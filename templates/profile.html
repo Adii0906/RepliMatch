@@ -2,50 +2,145 @@
 
 {% block content %}
 <section class="profile-setup">
-    <div class="profile-container">
-        <h2 class="profile-title">Complete Your Profile</h2>
-        <p class="profile-subtitle">Help us find your perfect match</p>
+    <div class="profile-container-modern">
+        <h2 class="profile-title">✨ Build Your Developer Card</h2>
+        <p class="profile-subtitle">Show the world what makes you awesome!</p>
         
-        <form id="profile-form" class="profile-form">
-            <div class="form-section">
-                <h3>Technical Skills</h3>
-                <div class="skills-selector">
-                    <div class="skill-tag" data-skill="Python">Python</div>
-                    <div class="skill-tag" data-skill="JavaScript">JavaScript</div>
-                    <div class="skill-tag" data-skill="React">React</div>
-                    <div class="skill-tag" data-skill="Node.js">Node.js</div>
-                    <div class="skill-tag" data-skill="Flask">Flask</div>
-                    <div class="skill-tag" data-skill="Django">Django</div>
-                    <div class="skill-tag" data-skill="HTML/CSS">HTML/CSS</div>
-                    <div class="skill-tag" data-skill="SQL">SQL</div>
-                    <div class="skill-tag" data-skill="MongoDB">MongoDB</div>
-                    <div class="skill-tag" data-skill="Git">Git</div>
+        <form id="profile-form" class="profile-form-modern" method="POST" enctype="multipart/form-data" action="{{ url_for('profile') }}">
+            <!-- Profile Card Preview -->
+            <div class="profile-card-preview">
+                <div class="card-header-section">
+                    <div class="photo-upload-area">
+                        <div class="photo-placeholder" id="photo-preview">
+                            {% if user and user.profile_photo %}
+                            <img src="{{ url_for('static', filename=user.profile_photo) }}" alt="Profile" class="uploaded-photo">
+                            {% else %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <label for="profile_photo" class="upload-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Upload Photo
+                        </label>
+                        <input type="file" id="profile_photo" name="profile_photo" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div class="card-user-info">
+                        <h3 class="card-username">{{ session.get('username', 'Your Name') }}</h3>
+                        <p class="card-bio-preview" id="bio-preview">
+                            {% if user and user.bio %}{{ user.bio }}{% else %}Your bio will appear here...{% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card-skills-preview" id="skills-preview">
+                    {% if user and user.skills %}
+                        {% for skill in user.skills %}
+                        <span class="skill-chip-preview">{{ skill }}</span>
+                        {% endfor %}
+                    {% else %}
+                    <span class="placeholder-text">Select your skills below ⬇️</span>
+                    {% endif %}
                 </div>
             </div>
             
-            <div class="form-section">
-                <h3>Interests</h3>
-                <div class="interests-selector">
-                    <div class="interest-tag" data-interest="Web Development">Web Development</div>
-                    <div class="interest-tag" data-interest="Machine Learning">Machine Learning</div>
-                    <div class="interest-tag" data-interest="Game Development">Game Development</div>
-                    <div class="interest-tag" data-interest="Mobile Apps">Mobile Apps</div>
-                    <div class="interest-tag" data-interest="Data Science">Data Science</div>
-                    <div class="interest-tag" data-interest="Blockchain">Blockchain</div>
+            <!-- Bio Section -->
+            <div class="form-section-modern">
+                <label class="modern-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Your Bio
+                </label>
+                <textarea id="bio" name="bio" rows="3" class="modern-textarea" placeholder="Tell us your coding story... What drives you? What are you building?"
+                >{% if user and user.bio %}{{ user.bio }}{% endif %}</textarea>
+                <small class="char-counter"><span id="bio-count">0</span>/200 characters</small>
+            </div>
+            
+            <!-- Skills Section -->
+            <div class="form-section-modern">
+                <label class="modern-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    Technical Skills
+                </label>
+                <div class="skills-selector-modern">
+                    <div class="skill-tag" data-skill="Python">🐍 Python</div>
+                    <div class="skill-tag" data-skill="JavaScript">⚡ JavaScript</div>
+                    <div class="skill-tag" data-skill="React">⚛️ React</div>
+                    <div class="skill-tag" data-skill="Node.js">🟢 Node.js</div>
+                    <div class="skill-tag" data-skill="Flask">🌶️ Flask</div>
+                    <div class="skill-tag" data-skill="Django">🎸 Django</div>
+                    <div class="skill-tag" data-skill="HTML/CSS">🎨 HTML/CSS</div>
+                    <div class="skill-tag" data-skill="SQL">🗄️ SQL</div>
+                    <div class="skill-tag" data-skill="MongoDB">🍃 MongoDB</div>
+                    <div class="skill-tag" data-skill="Git">📦 Git</div>
+                    <div class="skill-tag" data-skill="TypeScript">📘 TypeScript</div>
+                    <div class="skill-tag" data-skill="Vue.js">💚 Vue.js</div>
+                    <div class="skill-tag" data-skill="Docker">🐳 Docker</div>
+                    <div class="skill-tag" data-skill="AWS">☁️ AWS</div>
+                    <div class="skill-tag" data-skill="Machine Learning">🤖 ML</div>
                 </div>
+                <input type="hidden" id="skills-input" name="skills">
             </div>
             
-            <div class="form-group">
-                <label for="replit-username">Replit Username</label>
-                <input type="text" id="replit-username" name="replit_username" placeholder="@yourusername">
+            <!-- Interests Section -->
+            <div class="form-section-modern">
+                <label class="modern-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    What Interests You?
+                </label>
+                <div class="interests-selector-modern">
+                    <div class="interest-tag" data-interest="Web Development">🌐 Web Development</div>
+                    <div class="interest-tag" data-interest="Machine Learning">🧠 Machine Learning</div>
+                    <div class="interest-tag" data-interest="Game Development">🎮 Game Development</div>
+                    <div class="interest-tag" data-interest="Mobile Apps">📱 Mobile Apps</div>
+                    <div class="interest-tag" data-interest="Data Science">📊 Data Science</div>
+                    <div class="interest-tag" data-interest="Blockchain">⛓️ Blockchain</div>
+                    <div class="interest-tag" data-interest="AI/NLP">💬 AI/NLP</div>
+                    <div class="interest-tag" data-interest="DevOps">🔧 DevOps</div>
+                    <div class="interest-tag" data-interest="Cybersecurity">🔒 Cybersecurity</div>
+                </div>
+                <input type="hidden" id="interests-input" name="interests">
             </div>
             
-            <div class="form-group">
-                <label for="bio">Bio</label>
-                <textarea id="bio" name="bio" rows="4" placeholder="Tell us about your coding journey..."></textarea>
+            <!-- Replit Username -->
+            <div class="form-section-modern">
+                <label class="modern-label" for="replit-username">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                    Replit Username (Optional)
+                </label>
+                <input type="text" id="replit-username" name="replit_username" class="modern-input" placeholder="@yourusername"
+                {% if user and user.replit_username %}value="{{ user.replit_username }}"{% endif %}>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-full">Save Profile</button>
+            <button type="submit" class="btn btn-primary btn-full btn-glow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save My Awesome Profile
+            </button>
         </form>
     </div>
 </section>
@@ -53,59 +148,94 @@
 
 {% block scripts %}
 <script>
-let selectedSkills = [];
-let selectedInterests = [];
+let selectedSkills = new Set({{ user.skills|tojson if user and user.skills else '[]'|safe }});
+let selectedInterests = new Set({{ user.interests|tojson if user and user.interests else '[]'|safe }});
+
+// Profile photo preview
+document.getElementById('profile_photo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('photo-preview');
+            preview.innerHTML = `<img src="${e.target.result}" alt="Profile" class="uploaded-photo">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Bio preview and character counter
+const bioTextarea = document.getElementById('bio');
+const bioPreview = document.getElementById('bio-preview');
+const bioCount = document.getElementById('bio-count');
+
+bioTextarea.addEventListener('input', function() {
+    const text = this.value;
+    bioPreview.textContent = text || 'Your bio will appear here...';
+    bioCount.textContent = Math.min(text.length, 200);
+    if (text.length > 200) {
+        this.value = text.substring(0, 200);
+    }
+});
+
+// Initialize character count
+bioCount.textContent = bioTextarea.value.length;
 
 // Handle skill selection
+const skillsPreview = document.getElementById('skills-preview');
+
+function updateSkillsPreview() {
+    if (selectedSkills.size > 0) {
+        skillsPreview.innerHTML = Array.from(selectedSkills)
+            .map(skill => `<span class="skill-chip-preview">${skill}</span>`)
+            .join('');
+    } else {
+        skillsPreview.innerHTML = '<span class="placeholder-text">Select your skills below ⬇️</span>';
+    }
+    document.getElementById('skills-input').value = Array.from(selectedSkills).join(',');
+}
+
 document.querySelectorAll('.skill-tag').forEach(tag => {
+    // Pre-select skills if user data exists
+    if (selectedSkills.has(tag.dataset.skill)) {
+        tag.classList.add('selected');
+    }
+    
     tag.addEventListener('click', function() {
         this.classList.toggle('selected');
         const skill = this.dataset.skill;
-        if (selectedSkills.includes(skill)) {
-            selectedSkills = selectedSkills.filter(s => s !== skill);
+        if (selectedSkills.has(skill)) {
+            selectedSkills.delete(skill);
         } else {
-            selectedSkills.push(skill);
+            selectedSkills.add(skill);
         }
+        updateSkillsPreview();
     });
 });
+
+// Initialize skills preview
+updateSkillsPreview();
 
 // Handle interest selection
 document.querySelectorAll('.interest-tag').forEach(tag => {
+    // Pre-select interests if user data exists
+    if (selectedInterests.has(tag.dataset.interest)) {
+        tag.classList.add('selected');
+    }
+    
     tag.addEventListener('click', function() {
         this.classList.toggle('selected');
         const interest = this.dataset.interest;
-        if (selectedInterests.includes(interest)) {
-            selectedInterests = selectedInterests.filter(i => i !== interest);
+        if (selectedInterests.has(interest)) {
+            selectedInterests.delete(interest);
         } else {
-            selectedInterests.push(interest);
+            selectedInterests.add(interest);
         }
+        document.getElementById('interests-input').value = Array.from(selectedInterests).join(',');
     });
 });
 
-// Handle form submission
-document.getElementById('profile-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const profileData = {
-        skills: selectedSkills,
-        interests: selectedInterests,
-        tech_stack: selectedSkills, // Using same as skills for simplicity
-        project_types: selectedInterests,
-        replit_username: document.getElementById('replit-username').value,
-        bio: document.getElementById('bio').value
-    };
-    
-    const response = await fetch('/profile', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(profileData)
-    });
-    
-    const data = await response.json();
-    
-    if (data.success) {
-        window.location.href = data.redirect;
-    }
-});
+// Initialize interests input
+document.getElementById('interests-input').value = Array.from(selectedInterests).join(',');
 </script>
 {% endblock %}

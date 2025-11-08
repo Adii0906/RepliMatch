@@ -40,6 +40,7 @@ class Database:
                 replit_username TEXT,
                 bio TEXT,
                 repl_data TEXT,
+                profile_photo TEXT,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         ''')
@@ -107,7 +108,7 @@ class Database:
             cursor.execute('''
                 UPDATE profiles SET
                 skills = ?, interests = ?, tech_stack = ?,
-                project_types = ?, replit_username = ?, bio = ?
+                project_types = ?, replit_username = ?, bio = ?, profile_photo = ?
                 WHERE user_id = ?
             ''', (
                 json.dumps(profile_data['skills']),
@@ -116,13 +117,14 @@ class Database:
                 json.dumps(profile_data['project_types']),
                 profile_data['replit_username'],
                 profile_data['bio'],
+                profile_data.get('profile_photo'),
                 user_id
             ))
         else:
             cursor.execute('''
                 INSERT INTO profiles (user_id, skills, interests, tech_stack,
-                project_types, replit_username, bio)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                project_types, replit_username, bio, profile_photo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_id,
                 json.dumps(profile_data['skills']),
@@ -130,7 +132,8 @@ class Database:
                 json.dumps(profile_data['tech_stack']),
                 json.dumps(profile_data['project_types']),
                 profile_data['replit_username'],
-                profile_data['bio']
+                profile_data['bio'],
+                profile_data.get('profile_photo')
             ))
         
         conn.commit()

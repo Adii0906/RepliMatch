@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 from dotenv import load_dotenv
 import secrets
@@ -16,11 +17,21 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Set session lifetime
 app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookie over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to session cookie
+app.config['UPLOAD_FOLDER'] = 'static/uploads/profile_photos'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize utilities
 db = Database()
 matcher = AIMatchmaker()
 analyzer = ReplAnalyzer()
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -88,29 +99,64 @@ def profile():
         return redirect(url_for('index'))
     
     if request.method == 'POST':
-        data = request.json
         user_id = session['user_id']
         
-        # Save user profile data
-        profile_data = {
-            'skills': data.get('skills', []),
-            'interests': data.get('interests', []),
-            'tech_stack': data.get('tech_stack', []),
-            'project_types': data.get('project_types', []),
-            'replit_username': data.get('replit_username'),
-            'bio': data.get('bio', '')
-        }
+        # Check if it's a file upload or JSON data
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Handle form data with file upload
+            profile_photo_path = None
+            if 'profile_photo' in request.files:
+                file = request.files['profile_photo']
+                if file and file.filename and allowed_file(file.filename):
+                    filename = secure_filename(f"{user_id}_{datetime.now().timestamp()}_{file.filename}")
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    profile_photo_path = f"uploads/profile_photos/{filename}"
+            
+            # Parse form data
+            skills = request.form.get('skills', '').split(',') if request.form.get('skills') else []
+            interests = request.form.get('interests', '').split(',') if request.form.get('interests') else []
+            
+            profile_data = {
+                'skills': [s.strip() for s in skills if s.strip()],
+                'interests': [i.strip() for i in interests if i.strip()],
+                'tech_stack': [s.strip() for s in skills if s.strip()],
+                'project_types': [i.strip() for i in interests if i.strip()],
+                'replit_username': request.form.get('replit_username', ''),
+                'bio': request.form.get('bio', ''),
+                'profile_photo': profile_photo_path
+            }
+        else:
+            # Handle JSON data (backward compatibility)
+            data = request.json
+            profile_data = {
+                'skills': data.get('skills', []),
+                'interests': data.get('interests', []),
+                'tech_stack': data.get('tech_stack', []),
+                'project_types': data.get('project_types', []),
+                'replit_username': data.get('replit_username'),
+                'bio': data.get('bio', ''),
+                'profile_photo': data.get('profile_photo')
+            }
         
         db.update_profile(user_id, profile_data)
         
         # Analyze user's Repls
         if profile_data['replit_username']:
-            repl_data = analyzer.analyze_user_repls(profile_data['replit_username'])
-            db.update_repl_data(user_id, repl_data)
+            try:
+                repl_data = analyzer.analyze_user_repls(profile_data['replit_username'])
+                db.update_repl_data(user_id, repl_data)
+            except Exception as e:
+                print(f"Error analyzing Repls: {str(e)}")
         
-        return jsonify({'success': True, 'redirect': '/dashboard'})
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            return redirect(url_for('dashboard'))
+        else:
+            return jsonify({'success': True, 'redirect': '/dashboard'})
     
-    return render_template('profile.html')
+    user_id = session['user_id']
+    user_data = db.get_user_profile(user_id)
+    return render_template('profile.html', user=user_data)
 
 @app.route('/dashboard')
 def dashboard():
@@ -204,5 +250,50 @@ def analyze_repo():
     
     return jsonify(analysis)
 
+@app.route('/search-users', methods=['GET', 'POST'])
+def search_users():
+    """Search users by skills"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    if request.method == 'POST':
+        data = request.json
+        search_skills = data.get('skills', [])
+        
+        if not search_skills:
+            return jsonify({'error': 'No skills provided'}), 400
+        
+        user_id = session['user_id']
+        all_users = db.get_all_users(exclude_id=user_id)
+        
+        # Filter users by matching skills
+        matching_users = []
+        for user in all_users:
+            user_skills = set(user.get('skills', []))
+            search_skills_set = set(search_skills)
+            
+            # Calculate match percentage
+            if user_skills:
+                common_skills = user_skills.intersection(search_skills_set)
+                if common_skills:
+                    match_percentage = len(common_skills) / len(search_skills_set) * 100
+                    matching_users.append({
+                        'user_id': user['id'],
+                        'username': user.get('username', 'Unknown'),
+                        'skills': list(user_skills),
+                        'common_skills': list(common_skills),
+                        'interests': user.get('interests', []),
+                        'bio': user.get('bio', ''),
+                        'profile_photo': user.get('profile_photo'),
+                        'match_percentage': round(match_percentage, 1)
+                    })
+        
+        # Sort by match percentage
+        matching_users.sort(key=lambda x: x['match_percentage'], reverse=True)
+        
+        return jsonify({'success': True, 'users': matching_users})
+    
+    return render_template('search.html')
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=4040, debug=True)
